@@ -15,6 +15,13 @@ def log_level() -> int:
     )
 
 
+def allowed_origins() -> list:
+    """
+    Allow origin from specified URLs (defaults to 'http://localhost:3000')
+    """
+    return env.get('ALLOWED_ORIGINS', 'http://localhost:3000').split(';')
+
+
 """
 REDIS
 """

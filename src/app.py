@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select, func
 
+import config
 import const
 import context
 import util
@@ -17,6 +19,14 @@ APP
 """
 
 app = FastAPI(title='1mpu1se backend', version='1.0.0b')
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=config.allowed_origins(),
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*']
+)
 
 """
 HELPERS
