@@ -112,6 +112,40 @@ async def index(
     }
 
 
+@router.get('/me',
+            name='Информация',
+            description="""
+Информация о текущем пользователе.
+
+---
+
+Параметры запроса:
+- token - токен сессии
+
+---
+
+Успешный ответ - объект пользователя:
+```
+{
+  "user": {
+    "user_id": <id_пользователя>,
+    "username": "<имя>",
+    "is_admin": <является_ли_администратором - true/false>
+  }
+}
+```
+
+            """)
+async def get_me(
+    token: Annotated[str, Query(title='Токен сессии')]
+):
+    db = next(context.get_db())
+    me = assert_is_user(db, token)
+    return {
+        'user': me.to_dict()
+    }
+
+
 @router.get('/artist/{artist_id}',
             name='Исполнитель',
             description="""
