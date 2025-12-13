@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Header
 from fastapi.responses import StreamingResponse
 from sqlalchemy import func
 from sqlalchemy import select, desc
@@ -383,24 +383,64 @@ async def song(
             """)
 async def asset(
     asset_id: int,
-    token: Annotated[str, Query(title='Токен сессии')]
+    token: Annotated[str, Query(title='Токен сессии')],
+    _range: str | None = Header(None, alias='range')
 ):
     db = next(context.get_db())
 
     assert_is_user(db, token)
 
-    s3 = context.ctx.s3
-
     _asset = db.get(Asset, asset_id)
     if _asset is None or not _asset.is_uploaded:
         raise HTTPException(404)
 
+    s3 = context.ctx.s3
+
+    file_size = s3.head_object(
+        Bucket=const.BUCKET_NAME,
+        Key=str(_asset.asset_id)
+    )['ContentLength']
+
+    resp_code = 200
+    resp_headers = {
+        'accept-ranges': 'bytes',
+        'content-encoding': 'identity',
+        'content-length': str(file_size),
+        'access-control-expose-headers': (
+            'content-type, accept-ranges, content-length, '
+            'content-range, content-encoding'
+        )
+    }
+
+    start = 0
+    end = file_size - 1
+
+    if _range is not None:
+        try:
+            p = _range.replace('bytes=', '').split('-')
+            start = int(p[0]) if p[0] else 0
+            end = int(p[1]) if p[1] else file_size - 1
+            if start > end or start < 0 or end > file_size - 1:
+                raise Exception
+        except Exception:
+            raise HTTPException(416)
+
+        resp_code = 206
+        resp_headers['content-length'] = str(end - start + 1)
+        resp_headers['content-range'] = f'bytes {start}-{end}/{file_size}'
+
     obj = s3.get_object(
         Bucket=const.BUCKET_NAME,
-        Key=str(asset_id)
+        Key=str(_asset.asset_id),
+        Range=f'bytes={start}-{end}'
     )
 
-    return StreamingResponse(obj['Body'], media_type=obj['ContentType'])
+    return StreamingResponse(
+        content=obj['Body'],
+        status_code=resp_code,
+        headers=resp_headers,
+        media_type=obj['ContentType']
+    )
 
 
 @router.get('/search',
