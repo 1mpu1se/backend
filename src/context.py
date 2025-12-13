@@ -28,7 +28,7 @@ class Context:
                 config.postgres_host(),
                 config.postgres_port(),
                 config.postgres_database()
-            )),
+            ), pool_size=20, max_overflow=0),
             autocommit=False,
             autoflush=False,
         )
