@@ -1,0 +1,30 @@
+name: Tests
+
+on:
+    workflow_dispatch:
+    push:
+        tags:
+          - 'v*'
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout
+            uses: actions/checkout@v5
+            with:
+                fetch-depth: 0
+
+          - name: Setup python
+            uses: actions/setup-python@v6
+            with:
+               python-version: '3.12'
+
+          - name: Install requirements
+            run: |
+                pip install --no-cache-dir -r ./requirements.main.txt \
+                && pip install --no-cache-dir -r ./requirements.test.txt
+
+          - name: Run tests
+            run: |
+                python -m pytest
