@@ -1,9 +1,10 @@
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query, Header
+from fastapi import APIRouter, HTTPException, Query, Header, Depends
 from fastapi.responses import StreamingResponse
 from sqlalchemy import func
 from sqlalchemy import select, desc
+from sqlalchemy.orm import Session
 
 import const
 import context
@@ -28,7 +29,7 @@ HELPERS
 """
 
 
-def assert_is_user(db, token: str) -> User:
+def assert_is_user(db: Session, token: str) -> User:
     redis = context.ctx.rs
 
     user_id = redis.get(token)
@@ -95,10 +96,9 @@ ENDPOINTS
 
             """)
 async def index(
-    token: Annotated[str, Query(title='Токен сессии')]
+    token: Annotated[str, Query(title='Токен сессии')],
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
-
     assert_is_user(db, token)
 
     artists = db.scalars(select(Artist).order_by(desc(Artist.artist_id)).limit(const.INDEX_ARTISTS_COUNT))
@@ -137,9 +137,9 @@ async def index(
 
             """)
 async def get_me(
-    token: Annotated[str, Query(title='Токен сессии')]
+    token: Annotated[str, Query(title='Токен сессии')],
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
     me = assert_is_user(db, token)
     return {
         'user': me.to_dict()
@@ -174,10 +174,9 @@ async def get_me(
             """)
 async def artist(
     artist_id: int,
-    token: Annotated[str, Query(title='Токен сессии')]
+    token: Annotated[str, Query(title='Токен сессии')],
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
-
     assert_is_user(db, token)
 
     return {
@@ -215,10 +214,9 @@ async def artist(
 async def artist_albums(
     artist_id: int,
     token: Annotated[str, Query(title='Токен сессии')],
-    page: Annotated[int, Query(title='Номер страницы', min=1)] = 1
+    page: Annotated[int, Query(title='Номер страницы', min=1)] = 1,
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
-
     assert_is_user(db, token)
 
     try:
@@ -264,10 +262,9 @@ async def artist_albums(
             """)
 async def album(
     album_id: int,
-    token: Annotated[str, Query(title='Токен сессии')]
+    token: Annotated[str, Query(title='Токен сессии')],
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
-
     assert_is_user(db, token)
 
     return {
@@ -305,10 +302,9 @@ async def album(
 async def album_songs(
     album_id: int,
     token: Annotated[str, Query(title='Токен сессии')],
-    page: Annotated[int, Query(title='Номер страницы', min=1)] = 1
+    page: Annotated[int, Query(title='Номер страницы', min=1)] = 1,
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
-
     assert_is_user(db, token)
 
     try:
@@ -354,10 +350,9 @@ async def album_songs(
 """)
 async def song(
     song_id: int,
-    token: Annotated[str, Query(title='Токен сессии')]
+    token: Annotated[str, Query(title='Токен сессии')],
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
-
     assert_is_user(db, token)
 
     return {
@@ -384,10 +379,9 @@ async def song(
 async def asset(
     asset_id: int,
     token: Annotated[str, Query(title='Токен сессии')],
-    _range: str | None = Header(None, alias='range')
+    _range: str | None = Header(None, alias='range'),
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
-
     assert_is_user(db, token)
 
     _asset = db.get(Asset, asset_id)
@@ -498,9 +492,8 @@ async def asset(
 async def search(
     token: Annotated[str, Query(title='Токен сессии')],
     q: Annotated[str, Query(title='Запрос')],
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
-
     assert_is_user(db, token)
 
     es = context.ctx.es
@@ -544,9 +537,9 @@ async def search(
 
                """)
 async def logout(
-    token: Annotated[str, Query(title='Токен сессии')]
+    token: Annotated[str, Query(title='Токен сессии')],
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
     me = assert_is_user(db, token)
 
     context.ctx.rs.delete(token)

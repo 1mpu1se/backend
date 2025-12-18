@@ -1,6 +1,7 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select, func
+from sqlalchemy.orm import Session
 
 import config
 import const
@@ -102,9 +103,7 @@ async def index():
 ```
 
 """)
-async def login(form: LoginForm):
-    db = next(context.get_db())
-
+async def login(form: LoginForm, db: Session = Depends(context.get_db)):
     user = db.scalar(select(User).where(User.username == form.username))
     if user is None or not util.checkpw(form.password, user.password):
         raise HTTPException(401)
@@ -140,9 +139,7 @@ async def login(form: LoginForm):
 ```
 
 """)
-async def register(form: LoginForm):
-    db = next(context.get_db())
-
+async def register(form: LoginForm, db: Session = Depends(context.get_db)):
     count = db.scalar(select(func.count()).select_from(User))
 
     user = User(

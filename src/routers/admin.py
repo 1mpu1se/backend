@@ -1,9 +1,10 @@
 from typing import Annotated
 
 from botocore.exceptions import ClientError
-from fastapi import APIRouter, HTTPException, Query, File, UploadFile
+from fastapi import APIRouter, HTTPException, Query, File, UploadFile, Depends
 from sqlalchemy import func
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 import const
 import context
@@ -36,7 +37,7 @@ HELPERS
 """
 
 
-def assert_is_admin(db, token: str) -> User:
+def assert_is_admin(db: Session, token: str) -> User:
     redis = context.ctx.rs
 
     user_id = redis.get(token)
@@ -86,10 +87,9 @@ USERS
             """)
 async def users_list(
     token: Annotated[str, Query(title='Токен сессии')],
-    page: Annotated[int, Query(title='Номер страницы', min=1)] = 1
+    page: Annotated[int, Query(title='Номер страницы', min=1)] = 1,
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
-
     assert_is_admin(db, token)
 
     try:
@@ -145,9 +145,9 @@ async def users_list(
             """)
 async def users_create(
     token: Annotated[str, Query(title='Токен сессии')],
-    body: UserCreateForm
+    body: UserCreateForm,
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
     me = assert_is_admin(db, token)
 
     try:
@@ -196,10 +196,9 @@ async def users_create(
             """)
 async def users_read(
     user_id: int,
-    token: Annotated[str, Query(title='Токен сессии')]
+    token: Annotated[str, Query(title='Токен сессии')],
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
-
     assert_is_admin(db, token)
 
     return {
@@ -247,10 +246,9 @@ async def users_read(
 async def users_update(
     user_id: int,
     token: Annotated[str, Query(title='Токен сессии')],
-    body: UserUpdateForm
+    body: UserUpdateForm,
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
-
     me = assert_is_admin(db, token)
     user = assert_exists(db, User, user_id)
 
@@ -307,10 +305,9 @@ async def users_update(
             """)
 async def users_delete(
     user_id: int,
-    token: Annotated[str, Query(title='Токен сессии')]
+    token: Annotated[str, Query(title='Токен сессии')],
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
-
     me = assert_is_admin(db, token)
     user = assert_exists(db, User, user_id)
 
@@ -366,10 +363,9 @@ ARTISTS
             """)
 async def artists_list(
     token: Annotated[str, Query(title='Токен сессии')],
-    page: Annotated[int, Query(title='Номер страницы', min=1)] = 1
+    page: Annotated[int, Query(title='Номер страницы', min=1)] = 1,
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
-
     assert_is_admin(db, token)
 
     try:
@@ -426,9 +422,9 @@ async def artists_list(
             """)
 async def artists_create(
     token: Annotated[str, Query(title='Токен сессии')],
-    body: ArtistForm
+    body: ArtistForm,
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
     me = assert_is_admin(db, token)
 
     try:
@@ -478,10 +474,9 @@ async def artists_create(
             """)
 async def artists_read(
     artist_id: int,
-    token: Annotated[str, Query(title='Токен сессии')]
+    token: Annotated[str, Query(title='Токен сессии')],
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
-
     assert_is_admin(db, token)
 
     return {
@@ -527,9 +522,9 @@ async def artists_read(
 async def artists_update(
     artist_id: int,
     token: Annotated[str, Query(title='Токен сессии')],
-    body: ArtistForm
+    body: ArtistForm,
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
     me = assert_is_admin(db, token)
 
     artist = assert_exists(db, Artist, artist_id)
@@ -582,9 +577,9 @@ async def artists_update(
             """)
 async def artists_delete(
     artist_id: int,
-    token: Annotated[str, Query(title='Токен сессии')]
+    token: Annotated[str, Query(title='Токен сессии')],
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
     me = assert_is_admin(db, token)
 
     artist = assert_exists(db, Artist, artist_id)
@@ -636,10 +631,9 @@ async def artists_delete(
 async def artists_albums(
     artist_id: int,
     token: Annotated[str, Query(title='Токен сессии')],
-    page: Annotated[int, Query(title='Номер страницы', min=1)] = 1
+    page: Annotated[int, Query(title='Номер страницы', min=1)] = 1,
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
-
     assert_is_admin(db, token)
 
     try:
@@ -700,9 +694,9 @@ ALBUMS
             """)
 async def albums_create(
     token: Annotated[str, Query(title='Токен сессии')],
-    body: AlbumForm
+    body: AlbumForm,
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
     me = assert_is_admin(db, token)
 
     try:
@@ -752,10 +746,9 @@ async def albums_create(
             """)
 async def albums_read(
     album_id: int,
-    token: Annotated[str, Query(title='Токен сессии')]
+    token: Annotated[str, Query(title='Токен сессии')],
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
-
     assert_is_admin(db, token)
 
     return {
@@ -801,9 +794,9 @@ async def albums_read(
 async def albums_update(
     album_id: int,
     token: Annotated[str, Query(title='Токен сессии')],
-    body: AlbumForm
+    body: AlbumForm,
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
     me = assert_is_admin(db, token)
 
     album = assert_exists(db, Album, album_id)
@@ -856,9 +849,9 @@ async def albums_update(
             """)
 async def albums_delete(
     album_id: int,
-    token: Annotated[str, Query(title='Токен сессии')]
+    token: Annotated[str, Query(title='Токен сессии')],
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
     me = assert_is_admin(db, token)
 
     album = assert_exists(db, Album, album_id)
@@ -910,10 +903,9 @@ async def albums_delete(
 async def albums_songs(
     album_id: int,
     token: Annotated[str, Query(title='Токен сессии')],
-    page: Annotated[int, Query(title='Номер страницы', min=1)] = 1
+    page: Annotated[int, Query(title='Номер страницы', min=1)] = 1,
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
-
     assert_is_admin(db, token)
 
     try:
@@ -974,9 +966,9 @@ SONGS
             """)
 async def songs_create(
     token: Annotated[str, Query(title='Токен сессии')],
-    body: SongForm
+    body: SongForm,
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
     me = assert_is_admin(db, token)
 
     try:
@@ -1026,10 +1018,9 @@ async def songs_create(
             """)
 async def songs_read(
     song_id: int,
-    token: Annotated[str, Query(title='Токен сессии')]
+    token: Annotated[str, Query(title='Токен сессии')],
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
-
     assert_is_admin(db, token)
 
     return {
@@ -1075,9 +1066,9 @@ async def songs_read(
 async def songs_update(
     song_id: int,
     token: Annotated[str, Query(title='Токен сессии')],
-    body: SongForm
+    body: SongForm,
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
     me = assert_is_admin(db, token)
 
     song = assert_exists(db, Song, song_id)
@@ -1130,9 +1121,9 @@ async def songs_update(
             """)
 async def songs_delete(
     song_id: int,
-    token: Annotated[str, Query(title='Токен сессии')]
+    token: Annotated[str, Query(title='Токен сессии')],
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
     me = assert_is_admin(db, token)
 
     song = assert_exists(db, Song, song_id)
@@ -1188,10 +1179,9 @@ UPLOAD
 async def upload(
     token: Annotated[str, Query(title='Токен сессии')],
     ensure_type: Annotated[str, Query(title='Тип файла для проверки')],
-    file: Annotated[UploadFile, File(title='Файл')]
+    file: Annotated[UploadFile, File(title='Файл')],
+    db: Session = Depends(context.get_db)
 ):
-    db = next(context.get_db())
-
     assert_is_admin(db, token)
 
     # Check size and content type
