@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-import const
+import src.const as const
 
 
 class UserUpdateForm(BaseModel):

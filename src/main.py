@@ -2,7 +2,7 @@ import logging
 
 import uvicorn
 
-import config
+import src.config as config
 
 logging.basicConfig(level=config.log_level())
 

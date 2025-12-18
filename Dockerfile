@@ -15,11 +15,14 @@ WORKDIR /app
 COPY    --from=build /usr/local/bin/ /usr/local/bin/
 COPY    --from=build /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
 
-COPY    ./src ./
+COPY    ./src ./src
 
+RUN     mkdir logs
+
+ENV     PYTHONPATH=/app
 ENV     PYTHONUNBUFFERED=1
 ENV     PYTHONDONTWRITEBYTECODE=1
 
-CMD     ["python", "main.py"]
+CMD     ["python", "./src/main.py"]
 
 EXPOSE  8080/tcp

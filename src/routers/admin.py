@@ -6,25 +6,25 @@ from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-import const
-import context
-import util
-from forms import (
+import src.const as const
+import src.context as context
+import src.util as util
+from src.forms import (
     AlbumForm,
     ArtistForm,
     SongForm,
     UserCreateForm,
     UserUpdateForm
 )
-from logger import log_admin_action as log_action
-from models import (
+from src.logger import log_admin_action as log_action
+from src.models import (
     Asset,
     User,
     Artist,
     Song,
     Album,
 )
-from routers.__base__ import assert_exists
+from src.routers.__base__ import assert_exists
 
 """
 ROUTER

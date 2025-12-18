@@ -1,8 +1,8 @@
 from sqlalchemy import event
 from sqlalchemy.orm import Mapped, mapped_column
 
-import const
-from models.__base__ import Base
+import src.const as const
+from src.models.__base__ import Base
 
 
 class User(Base):

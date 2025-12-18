@@ -1,12 +1,12 @@
 from sqlalchemy import event
 from sqlalchemy.orm import Mapped, mapped_column, relationship, attributes
 
-import const
-import context
-from models.__base__ import Base
-from models.album import Album
-from models.artist import Artist
-from models.asset import Asset
+import src.const as const
+import src.context as context
+from src.models.__base__ import Base
+from src.models.album import Album
+from src.models.artist import Artist
+from src.models.asset import Asset
 
 
 class Song(Base):

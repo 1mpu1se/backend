@@ -4,7 +4,7 @@ import redis
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-import config
+import src.config as config
 
 
 class Context:

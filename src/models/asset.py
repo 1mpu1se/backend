@@ -1,7 +1,7 @@
 from sqlalchemy import event
 from sqlalchemy.orm import Mapped, mapped_column
 
-from models.__base__ import Base
+from src.models.__base__ import Base
 
 
 class Asset(Base):
