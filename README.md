@@ -1,4 +1,4 @@
-# backend
+# backend [![Tests](https://github.com/1mpu1se/backend/actions/workflows/tests.yml/badge.svg)](https://github.com/1mpu1se/backend/actions/workflows/tests.yml)
 Бэк-энд сервис платформы.
 
 ## Конфигурация
